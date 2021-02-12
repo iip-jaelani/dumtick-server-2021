@@ -1,5 +1,5 @@
 var router = require("express").Router();
-const { Op } = require("sequelize");
+const { Op, col, literal, fn } = require("sequelize");
 
 var bcrypt = require("bcryptjs"),
 	jwt = require("jsonwebtoken"),
@@ -63,7 +63,6 @@ router.get("/per_day", (req, res) => {
 });
 router.get("/statistic", (req, res) => {
 	const date = (t) => new Date(t).getTime();
-	// moment.locale("ID");
 	const start = new Date(date(req.query.start));
 	const end = new Date(date(req.query.end) + 86400000);
 	transactionModel
@@ -73,17 +72,32 @@ router.get("/statistic", (req, res) => {
 					[Op.between]: [start, end],
 				},
 			},
-			attributes: ["id", "price"],
+			attributes: [
+				[fn("SUM", col("price")), "price"],
+				[fn("date", col("createdAt")), "date"],
+			],
+
+			group: [fn("date", col("createdAt")), "date"],
+			logging: console.log,
+			raw: true,
 		})
 		.then((result) => {
+			console.log(result);
 			res.send({
-				error: false,
-				message: "success get statistic order",
-				date: new Date(req.query.date),
-				month: moment(req.query.date).format("MMMM"),
-				day: moment(req.query.date).format("dddd"),
-				months: monthsAndDays.month(),
-				days: monthsAndDays.days(),
+				// error: false,
+				// message: "success get statistic order",
+				// date: [
+				// 	{ start_date: new Date(req.query.start).getTime() },
+				// 	{ end_date: new Date(req.query.end).getTime() },
+				// ],
+				// month: `${moment(req.query.start).format("MMMM")} - ${moment(
+				// 	req.query.end
+				// ).format("MMMM")}`,
+				// day: `${moment(req.query.start).format("dddd")} - ${moment(
+				// 	req.query.end
+				// ).format("dddd")}`,
+				data: result,
+				// label: monthsAndDays.days(),
 				timestamp: new Date().getTime(),
 			});
 		})

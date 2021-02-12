@@ -19,9 +19,6 @@ app.use(cors()); // Use this after the variable declaration
 var accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
 	flags: "a",
 });
-var accessLogStream = fs.createWriteStream(path.join(__dirname, "access.log"), {
-	flags: "a",
-});
 
 app.use(morgan("combined", { stream: accessLogStream }));
 
@@ -37,12 +34,13 @@ app.set("socket", io);
 
 var sessionMaps = [];
 const connectionIo = (socket) => {
-	socket.on("new_userId", (d) => {
+	socket.on("connect_user", (d) => {
+		console.log(d);
 		sessionMaps.push({
-			id: `${d}_${sessionMaps.length}`,
+			id: d,
 			client: socket.id,
 		});
-		console.log(sessionMaps);
+		console.log(clc.green("[user-connected]"), socket.id);
 	});
 	socket.on("disconnect", () => {
 		console.log(clc.red("[user-disconnect]"), socket.id);
@@ -50,7 +48,6 @@ const connectionIo = (socket) => {
 		if (index != -1) {
 			sessionMaps.splice(index, 1);
 		}
-		console.log(sessionMaps);
 	});
 };
 io.on("connection", connectionIo);
