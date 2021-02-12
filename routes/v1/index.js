@@ -5,6 +5,7 @@ router.use("/agent", require("./agent"));
 router.use("/category", require("./category"));
 router.use("/ticket", require("./tickets"));
 router.use("/like", require("./like"));
+router.use("/income", require("./income"));
 router.use("/transaction", require("./transaction"));
 router.use("/notification", require("./notifications"));
 
